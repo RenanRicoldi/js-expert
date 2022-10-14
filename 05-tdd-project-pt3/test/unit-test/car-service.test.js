@@ -4,12 +4,13 @@ const { join } = require('path')
 const sinon = require('sinon')
 
 const carsDatabase = join(__dirname, './../../database', "cars.json")
-const CarService = require('./../../src/service/car-service')
+const CarService = require('../../src/service/car-service')
+const Transaction = require('../../src/entities/transaction')
 
 const mocks = {
-  validCarCategory: require('./../mocks/valid-car-category.json'),
-  validCar: require('./../mocks/valid-car.json'),
-  validCustomer: require('./../mocks/valid-customer.json'),
+  validCarCategory: require('../mocks/valid-car-category.json'),
+  validCar: require('../mocks/valid-car.json'),
+  validCustomer: require('../mocks/valid-customer.json'),
 }
 
 describe('Car Service Suite Tests', () => {
@@ -78,6 +79,68 @@ describe('Car Service Suite Tests', () => {
     
     expect(carService.chooseRandomCarInCarCategory.calledOnce).to.be.ok
     expect(carService.carRepository.find.calledWithExactly(car.id)).to.be.ok
+    expect(result).to.be.deep.equal(expected)
+  })
+
+  it('given a car category, customer and number of days, it should calculate the final amount in BRL', async() => {
+    const customer = Object.create(mocks.validCustomer)
+    const carCategory = Object.create(mocks.validCarCategory)
+    const numberOfDays = 5
+    
+    customer.age = 50
+    carCategory.price = 37.6
+
+    // do not depend on external data.
+    sandbox.stub(
+        carService,
+        "taxesBasedOnAge"
+    ).get(() => [{ from: 40, to: 50, then: 1.3 }])
+    
+    const expected = carService.currencyFormat.format(244.4)
+    const result = carService.calculateFinalPrice(
+      customer,
+      carCategory,
+      numberOfDays
+    )
+
+    expect(result).to.be.deep.equal(expected)
+  })
+
+  it('given a customer and a car category it should return a transaction receipt', async () => {
+    const car = mocks.validCar
+    const customer = Object.create(mocks.validCustomer)
+    const carCategory = {
+      ...mocks.validCarCategory,
+      price: 37.6,
+      carIds: [car.id]
+    }
+
+    const numberOfDays = 5
+    const dueDate = "10 de novembro de 2020"
+    const now = new Date(2020, 10, 5)
+    
+    customer.age = 20
+    
+    sandbox.useFakeTimers(now.getTime())
+
+    sandbox.stub(
+      carService.carRepository,
+      carService.carRepository.find.name,
+    ).resolves(car)
+    
+    const expectedAmount = carService.currencyFormat.format(206.80)
+    
+    const result = await carService.rent(
+      customer, carCategory, numberOfDays
+    )
+
+    const expected = new Transaction({
+      customer,
+      car,
+      dueDate,
+      amount: expectedAmount,
+    })
+
     expect(result).to.be.deep.equal(expected)
   })
 })
