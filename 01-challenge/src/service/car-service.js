@@ -3,8 +3,9 @@ const Tax = require('../entities/tax')
 const Transaction = require('../entities/transaction')
 
 class CarService {
-  constructor({ carsFile }) {
+  constructor({ carsFile, carCategoriesFile }) {
     this.carRepository = new BaseRepository({ file: carsFile })
+    this.carCategoryRepository = new BaseRepository({ file: carCategoriesFile })
     this.taxesBasedOnAge = Tax.taxesBasedOnAge
     this.currencyFormat = new Intl.NumberFormat('pt-br', {
       style: 'currency',
@@ -18,6 +19,18 @@ class CarService {
     )
   }
 
+  async getCarCategoryById(carCategoryId) {
+    const carCategory = await this.carCategoryRepository.find(carCategoryId)
+
+    if (!carCategory)
+      throw new Error(JSON.stringify({
+        status: 400,
+        message: "Car category not found"
+      }))
+
+    return carCategory
+  }
+
   chooseRandomCarInCarCategory(carCategory) {
     const randomCarIndex = this.getRandomPositionFromArray(carCategory.carIds)
 
@@ -25,13 +38,13 @@ class CarService {
   }
 
   async getAvailableCarInCarCategory(carCategory) {
-    const carId = this.chooseRandomCarInCarCategory(carCategory)
+    const carId = await this.chooseRandomCarInCarCategory(carCategory)
 
     return this.carRepository.find(carId)
   }
 
   calculateFinalPrice({ age }, carCategory, numberOfDays) {
-    const price = carCategory.price 
+    const price = carCategory.pricePerDay
 
     const { then: tax } = this.taxesBasedOnAge
       .find(tax => age >= tax.from && age <= tax.to)

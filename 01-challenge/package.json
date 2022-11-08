@@ -6,7 +6,8 @@
   "scripts": {
     "test": "yarn mocha -w --parallel **/**/*.test.js",
     "test:cov": "yarn nyc yarn mocha -w --parallel **/**/*.test.js",
-    "seed": "node ./seed"
+    "seed": "node ./seed",
+    "start": "node src/api.js"
   },
   "dependencies": {
     "faker": "5.1.0"
@@ -15,6 +16,7 @@
     "chai": "4",
     "mocha": "8",
     "nyc": "15",
-    "sinon": "9"
+    "sinon": "9",
+    "supertest": "^6.3.0"
   }
 }

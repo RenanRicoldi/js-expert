@@ -1,4 +1,4 @@
-{
+[{
   "id": "38dc3221-f46d-4066-8666-454b46300267",
   "name": "Extended Cab Pickup",
   "carIds": [
@@ -134,4 +134,4 @@
     "bd828e54-939a-4fb6-b606-6e83ebc315be"
   ],
   "pricePerDay": 67.22
-}
+}]

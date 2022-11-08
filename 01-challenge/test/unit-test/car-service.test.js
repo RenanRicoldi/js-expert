@@ -3,7 +3,7 @@ const { describe, it, before, beforeEach, afterEach } = require('mocha')
 const { join } = require('path')
 const sinon = require('sinon')
 
-const carsDatabase = join(__dirname, './../../database', "cars.json")
+const carsDatabase = join(__dirname, '..', '..', 'database', "cars.json")
 const CarService = require('../../src/service/car-service')
 const Transaction = require('../../src/entities/transaction')
 
@@ -96,7 +96,7 @@ describe('Car Service Suite Tests', () => {
         "taxesBasedOnAge"
     ).get(() => [{ from: 40, to: 50, then: 1.3 }])
     
-    const expected = carService.currencyFormat.format(244.4)
+    const expected = carService.currencyFormat.format(436.93)
     const result = carService.calculateFinalPrice(
       customer,
       carCategory,
@@ -128,7 +128,7 @@ describe('Car Service Suite Tests', () => {
       carService.carRepository.find.name,
     ).resolves(car)
     
-    const expectedAmount = carService.currencyFormat.format(206.80)
+    const expectedAmount = carService.currencyFormat.format(369.71)
     
     const result = await carService.rent(
       customer, carCategory, numberOfDays
